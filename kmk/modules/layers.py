@@ -1,9 +1,10 @@
 '''One layer isn't enough. Adds keys to get to more of them'''
-from kmk.keys import KC, make_argumented_key
-from kmk.modules.holdtap import HoldTap, HoldTapKeyMeta
-from kmk.utils import Debug
+from kmk.handlers.stock import passthrough
+from micropython import const # type: ignore
 
-debug = Debug(__name__)
+from kmk.key_validators import layer_key_validator
+from kmk.keys import make_key, make_argumented_key
+from kmk.modules.holdtap import ActivationType, HoldTap
 
 
 def layer_key_validator(layer, kc=None):
@@ -17,8 +18,10 @@ def layer_key_validator(layer, kc=None):
     return LayerKeyMeta(layer, kc)
 
 
-def layer_key_validator_lt(layer, kc, prefer_hold=False, **kwargs):
-    return HoldTapKeyMeta(tap=kc, hold=KC.MO(layer), prefer_hold=prefer_hold, **kwargs)
+    LT = const(0)
+    TT = const(1)
+    TL = const(2) # Tap/Layer, inverse of LT (i.e. TG(n) on tap instead of MO(n) on hold)
+    TH = const(3) # Tap/Hold, TT but uses hold instead of 3x tapdance
 
 
 def layer_key_validator_tt(layer, prefer_hold=True, **kwargs):
@@ -39,6 +42,12 @@ class Layers(HoldTap):
     def __init__(self):
         # Layers
         super().__init__()
+        self._is_locked = False
+        make_key(
+            names=('LLOCK',),
+            on_press=self._llock_pressed,
+            on_release=passthrough,
+        )
         make_argumented_key(
             validator=layer_key_validator,
             names=('MO',),
@@ -75,8 +84,20 @@ class Layers(HoldTap):
         make_argumented_key(
             validator=layer_key_validator_tt,
             names=('TT',),
-            on_press=self.ht_pressed,
-            on_release=self.ht_released,
+            on_press=curry(self.ht_pressed, key_type=LayerType.TT),
+            on_release=curry(self.ht_released, key_type=LayerType.TT),
+        )
+        make_argumented_key(
+            validator=layer_key_validator,
+            names=('TL',),
+            on_press=curry(self.ht_pressed, key_type=LayerType.TL),
+            on_release=curry(self.ht_released, key_type=LayerType.TL),
+        )
+        make_argumented_key(
+            validator=curry(layer_key_validator, prefer_hold=True),
+            names=('TH',),
+            on_press=curry(self.ht_pressed, key_type=LayerType.TH),
+            on_release=curry(self.ht_released, key_type=LayerType.TH),
         )
 
     def _df_pressed(self, key, keyboard, *args, **kwargs):
@@ -93,8 +114,8 @@ class Layers(HoldTap):
         keyboard.active_layers.insert(0, key.meta.layer)
         self._print_debug(keyboard)
 
-    @staticmethod
-    def _mo_released(key, keyboard, *args, **kwargs):
+    #@staticmethod
+    def _mo_released(self, key, keyboard, *args, **kwargs):
         # remove the first instance of the target layer
         # from the active list
         # under almost all normal use cases, this will
@@ -103,12 +124,14 @@ class Layers(HoldTap):
         # this also resolves an issue where using DF() on a layer
         # triggered by MO() and then defaulting to the MO()'s layer
         # would result in no layers active
-        try:
-            del_idx = keyboard.active_layers.index(key.meta.layer)
-            del keyboard.active_layers[del_idx]
-        except ValueError:
+        if self._is_locked:
             pass
-        __class__._print_debug(__class__, keyboard)
+        else:
+            try:
+                del_idx = keyboard.active_layers.index(key.meta.layer)
+                del keyboard.active_layers[del_idx]
+            except ValueError:
+                pass
 
     def _lm_pressed(self, key, keyboard, *args, **kwargs):
         '''
@@ -122,14 +145,20 @@ class Layers(HoldTap):
         '''
         As MO(layer) but with mod active
         '''
-        keyboard.remove_key(key.meta.kc)
-        self._mo_released(key, keyboard, *args, **kwargs)
+        if self._is_locked:
+            pass
+        else:
+            keyboard.hid_pending = True
+            keyboard.keys_pressed.discard(key.meta.kc)
+            self._mo_released(key, keyboard, *args, **kwargs)
 
     def _tg_pressed(self, key, keyboard, *args, **kwargs):
         '''
         Toggles the layer (enables it if not active, and vise versa)
         '''
         # See mo_released for implementation details around this
+        self._is_locked = False
+        keyboard.keys_pressed = set()
         try:
             del_idx = keyboard.active_layers.index(key.meta.layer)
             del keyboard.active_layers[del_idx]
@@ -140,10 +169,57 @@ class Layers(HoldTap):
         '''
         Activates layer and deactivates all other layers
         '''
+        self._is_locked = False
+        keyboard.keys_pressed = set()
         keyboard.active_layers.clear()
         keyboard.active_layers.insert(0, key.meta.layer)
 
-    def _print_debug(self, keyboard):
-        # debug(f'__getitem__ {key}')
-        if debug.enabled:
-            debug(f'active_layers={keyboard.active_layers}')
+    def ht_activate_hold(self, key, keyboard, *args, **kwargs):
+        key_type = kwargs['key_type']
+        if key_type == LayerType.LT:
+            self._mo_pressed(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TT:
+            self._tg_pressed(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TL:
+            keyboard.hid_pending = True
+            keyboard.keys_pressed.add(key.meta.kc)
+        elif key_type == LayerType.TH:
+            self._mo_pressed(key, keyboard, *args, **kwargs)
+            pass
+
+    def ht_deactivate_hold(self, key, keyboard, *args, **kwargs):
+        key_type = kwargs['key_type']
+        if key_type == LayerType.LT:
+            self._mo_released(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TT:
+            self._tg_pressed(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TL:
+            keyboard.hid_pending = True
+            keyboard.keys_pressed.discard(key.meta.kc)
+        elif key_type == LayerType.TH:
+            self._mo_released(key, keyboard, *args, **kwargs)
+
+    def ht_activate_tap(self, key, keyboard, *args, **kwargs):
+        key_type = kwargs['key_type']
+        if key_type == LayerType.LT:
+            keyboard.hid_pending = True
+            keyboard.keys_pressed.add(key.meta.kc)
+        elif key_type == LayerType.TT:
+            self._tg_pressed(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TL:
+            self._tg_pressed(key, keyboard, *args, **kwargs)
+        elif key_type == LayerType.TH:
+            self._tg_pressed(key, keyboard, *args, **kwargs)
+
+    def ht_deactivate_tap(self, key, keyboard, *args, **kwargs):
+        key_type = kwargs['key_type']
+        if key_type == LayerType.LT:
+            keyboard.hid_pending = True
+            keyboard.keys_pressed.discard(key.meta.kc)
+        elif key_type == LayerType.TL:
+            pass
+        elif key_type == LayerType.TH:
+            pass
+
+    def _llock_pressed(self, key, keyboard, *args, **kwargs):
+        self._is_locked = True
