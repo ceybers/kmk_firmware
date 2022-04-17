@@ -15,11 +15,9 @@ keyboard.modules.append(Layers())
 |`KC.MO(layer)`      |Momentarily activates layer, switches off when you let go              |
 |`KC.LM(layer, mod)` |As `MO(layer)` but with `mod` active                                   |
 |`KC.LT(layer, kc)`  |Momentarily activates layer if held, sends kc if tapped                |
-|`KC.TG(layer)`      |Toggles the layer (enables it if not active, and vice versa)            |
+|`KC.TG(layer)`      |Toggles the layer (enables it if no active, and vise versa)            |
 |`KC.TO(layer)`      |Activates layer and deactivates all other layers                       |
 |`KC.TT(layer)`      |Momentarily activates layer if held, toggles it if tapped repeatedly   |
-|`KC.TH(layer)`      |Toggles layer if tapped once, momentarily activates layer if held      |
-|`KC.LLOCK`          |Locks layer if currently active via `KC.MO` or `KC.LM`                 |
 
 ## Custom HoldTap Behavior
 `KC.TT` and `KC.LT` use the same heuristic to determine taps and holds as
@@ -69,27 +67,4 @@ keyboard.keymap = [
 		KC.TRNS,KC.TRNS,KC.TRNS,	
 	],
 ]
-```
-
-## Advanced Example
-A common question is: "How do I change RGB background based on my active layer?"
-Here is _one_ (simple) way of many to go about it.
-
-```python
-from kmk.modules.layers import Layers as _Layers
-from kmk.extensions.rgb import RGB
-
-rgb = RGB(...) # your RGB configuration goes here
-keyboard.extensions.append(rgb)
-
-class Layers(_Layers):
-	last_top_layer = 0
-	hues = (4, 20, 69)
-	
-	def after_hid_send(self, keyboard):
-		if keyboard.active_layers[0] != self.last_top_layer:
-			self.last_top_layer = keyboard.active_layers[0]
-			rgb.set_hsv_fill(self.hues[self.last_top_layer], 255, 255)
-
-keyboard.modules.append(Layers())
 ```
