@@ -18,6 +18,8 @@ keyboard.modules.append(Layers())
 |`KC.TG(layer)`      |Toggles the layer (enables it if no active, and vise versa)            |
 |`KC.TO(layer)`      |Activates layer and deactivates all other layers                       |
 |`KC.TT(layer)`      |Momentarily activates layer if held, toggles it if tapped repeatedly   |
+|`KC.TH(layer)`      |Toggles layer if tapped once, momentarily activates layer if held      |
+|`KC.LLOCK`          |Locks layer if currently active via `KC.MO` or `KC.LM`                 |
 
 ## Custom HoldTap Behavior
 `KC.TT` and `KC.LT` use the same heuristic to determine taps and holds as
