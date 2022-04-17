@@ -1,12 +1,9 @@
 '''Prints ASCII characters in Windows using LALT + 0123 Numpad sequences'''
-from kmk.keys import KC
-from kmk.handlers.sequences import simple_key_sequence, KeySequenceMeta, sequence_press_handler
+from kmk.keys import KC, make_key
+from kmk.handlers.sequences import KeySequenceMeta
 from kmk.handlers.stock import passthrough
-from kmk.extensions.lock_status import LockStatus
-from kmk.keys import make_key
 
 def ascii_sequence_press_handler(key, keyboard, KC, *args, **kwargs):
-    print('ascii_sequence_press_handler')
     oldkeys_pressed = keyboard.keys_pressed
     keyboard.keys_pressed = set()
 
