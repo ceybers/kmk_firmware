@@ -177,11 +177,18 @@ class AbstractHID:
         if self.report_device[0] == HIDReportTypes.CONSUMER:
             where_to_place = self.report_keys
 
-        for idx, _ in enumerate(where_to_place):
-            if where_to_place[idx] == 0x00:
-                where_to_place[idx] = key.code
-                placed = True
-                break
+        # Added support for 2 byte keycodes as used for Consumer Keys in the
+        # USB HID Usage Table, Section 15.15 Application Launch Buttons
+        if key.code > 0x00FF and key.code < 0xFFFF:
+            where_to_place[0] = key.code.to_bytes(2, 'little')[0]
+            where_to_place[1] = key.code.to_bytes(2, 'little')[1]
+            placed = True
+        else:
+            for idx, _ in enumerate(where_to_place):
+                if where_to_place[idx] == 0x00:
+                    where_to_place[idx] = key.code
+                    placed = True
+                    break
 
         if not placed:
             # TODO what do we do here?......
@@ -194,6 +201,14 @@ class AbstractHID:
 
         if self.report_device[0] == HIDReportTypes.CONSUMER:
             where_to_place = self.report_keys
+
+        if key.code > 0x00FF and key.code < 0xFFFF:
+            where_to_place[0] = 0x00
+            where_to_place[1] = 0x00
+        else:
+            for idx, _ in enumerate(where_to_place):
+                if where_to_place[idx] == key.code:
+                    where_to_place[idx] = 0x00
 
         for idx, _ in enumerate(where_to_place):
             if where_to_place[idx] == key.code:

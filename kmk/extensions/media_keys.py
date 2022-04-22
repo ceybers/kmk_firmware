@@ -26,6 +26,17 @@ class MediaKeys(Extension):
         make_consumer_key(code=184, names=('MEDIA_EJECT', 'EJCT'))  # 0xB8
         make_consumer_key(code=179, names=('MEDIA_FAST_FORWARD', 'MFFD'))  # 0xB3
         make_consumer_key(code=180, names=('MEDIA_REWIND', 'MRWD'))  # 0xB4
+        # 15.15 Application Launch Buttons
+        make_consumer_key(code=0x0183, names=('MEDIA_SELECT', 'MSEL',))  
+        make_consumer_key(code=0x018A, names=('MAIL',))  
+        make_consumer_key(code=0x0192, names=('CALCULATOR', 'CALC',))  
+        make_consumer_key(code=0x0194, names=('EXPLORER', 'EXPL',))
+        # make_consumer_key(code=0x0196, names=('BROWSER', 'WWW',)) # This does not seem to work on Windows 10
+        make_consumer_key(code=0x0221, names=('AC_SEARCH',))  
+        make_consumer_key(code=0x0223, names=('AC_HOME',))  
+        make_consumer_key(code=0x0224, names=('AC_BACK',))  
+        make_consumer_key(code=0x0225, names=('AC_FORWARD',))  
+        make_consumer_key(code=0x0226, names=('AC_STOP',))  
 
     def on_runtime_enable(self, sandbox):
         return
