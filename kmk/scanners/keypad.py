@@ -21,10 +21,13 @@ class KeypadScanner(Scanner):
 
         The key report is a byte array with contents [row, col, True if pressed else False]
         '''
-        ev = self.keypad.events.get()
-        if ev and self.offset:
-            return keypad.Event(ev.key_number + self.offset, ev.pressed)
-        return ev
+        ev = self.curr_event
+        has_event = self.keypad.events.get_into(ev)
+        if has_event:
+            if self.offset:
+                return keypad.Event(ev.key_number + self.offset, ev.pressed)
+            else:
+                return keypad.Event(ev.key_number, ev.pressed)
 
 
 class MatrixScanner(KeypadScanner):
