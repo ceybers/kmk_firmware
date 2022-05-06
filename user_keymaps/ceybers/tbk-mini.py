@@ -2,7 +2,7 @@ from kb import KMKKeyboard
 from kmk.keys import KC
 from kmk.handlers.sequences import send_string, simple_key_sequence
 from kmk.extensions.media_keys import MediaKeys
-from kmk.modules.combos import Combos, Chord
+from kmk.modules.combos import Combos, Chord, Sequence
 from kmk.modules.layers import Layers
 from kmk.modules.modtap import ModTap
 from kmk.modules.oneshot import OneShot
@@ -30,6 +30,7 @@ combos = Combos()
 # Aliases for VS Code highlighting
 _______ = KC.TRNS
 XXXXX   = KC.NO
+MRY_ACT = KC.TRNS
 
 # Aliases for brackets using Slow-Shift for RDP/VM
 SS_LPRN = KC.LSFT(KC.N9)
@@ -66,12 +67,12 @@ CTL_BSPC = KC.LCTL(KC.BSPC)
 CTL_DEL  = KC.LCTL(KC.DEL)
 
 # Aliases for Copy/Paste/Undo etc.
-#C_UNDO = KC.SCTL(KC.Z)
-C_CUT  = KC.LCTL(KC.X)
-C_COPY = KC.LCTL(KC.C)
-C_PSTE = KC.LCTL(KC.V)
-#C_REDO = KC.SCTL(KC.Y)
-C_SAVE = KC.LCTL(KC.S)
+C_UNDO = KC.SCTL(KC.Z)
+C_CUT  = KC.SCTL(KC.X)
+C_COPY = KC.SCTL(KC.C)
+C_PSTE = KC.SCTL(KC.V)
+C_REDO = KC.SCTL(KC.Y)
+C_SAVE = KC.SCTL(KC.S)
 
 # Aliases for tile manager/multimonitor hotkeys
 TM_LHS = KC.LGUI(KC.LEFT)
@@ -115,30 +116,31 @@ LHS_2 = KC.MT(KC.ESC, KC.LGUI, prefer_hold=False)
 LHS_3 = KC.MT(KC.TAB, KC.LALT, prefer_hold=False)
 
 # Thumb buttons tab & hold
-MRY_L1 = KC.TL(1, KC.LSFT, prefer_hold=True)
+MRY_L1 = KC.TL(2, KC.LSFT, prefer_hold=True)
 MRY_L2 = KC.SPC
-MRY_L3 = KC.TH(2)
+MRY_L3 = KC.DEL
 MRY_R1 = KC.BSPC      
 MRY_R2 = KC.ENT
-MRY_R3 = KC.MT(KC.DEL, KC.LCTL, prefer_hold=True)
+MRY_R3 = KC.TL(1, KC.LCTL, prefer_hold=True)
 
 # Lots and lots of chords
 combos.combos = [
     Chord((LHS_1,   KC.Q),    C_CUT), 
     Chord((LHS_2,   KC.A),    C_COPY),
     Chord((LHS_3,   KC.Z),    C_PSTE),
-    # Chord((KC.Q,    KC.Z),    SEL_ALL),
+   
+    Chord((KC.Q,    KC.A),    SEL_ALL),
+    Chord((LHS_1,   LHS_2),   C_SAVE),
 
-    # Chord((LHS_1,   LHS_2),   C_SAVE),
     Chord((LHS_2,   LHS_3),   KC.LM(3, KC.LSFT)),
     Chord((KC.A,    KC.Z),    KC.MO(4)),
    
     Chord((KC.P,    KC.B),    BR_NEW),
     Chord((KC.T,    KC.G),    BR_OLD),
     Chord((KC.D,    KC.V),    BR_CLS),
-    # Chord((KC.B,    KC.V),    BR_INC),
-    # Chord((KC.P,    KC.T),    BR_PRV),
-    # Chord((KC.T,    KC.D),    BR_NXT),
+    Chord((KC.B,    KC.V),    BR_INC),
+    Chord((KC.P,    KC.T),    BR_PRV),
+    Chord((KC.T,    KC.D),    BR_NXT),
    
     Chord((KC.J,    KC.L),    KC.MPRV),
     Chord((KC.M,    KC.N),    KC.MPLY),
@@ -156,57 +158,57 @@ combos.combos = [
    
     Chord((AC_COMM, AC_DOT),  KC.LALT(KC.TAB)),
    
-    # Sequence((AC_QUOT, KC.M), send_string("'m"),  timeout=100),
-    # Sequence((AC_QUOT, KC.S), send_string("'s"),  timeout=100),
-    # Sequence((AC_QUOT, KC.D), send_string("'d"),  timeout=100),
-    # Sequence((AC_QUOT, KC.T), send_string("'t"),  timeout=100),
-    # Sequence((AC_QUOT, KC.L), send_string("'ll"), timeout=100),
-    # Sequence((AC_QUOT, KC.R), send_string("'re"), timeout=100), 
-    # Sequence((AC_QUOT, KC.V), send_string("'ve"), timeout=100),
+    Sequence((AC_QUOT, KC.M), send_string("'m"),  timeout=100),
+    Sequence((AC_QUOT, KC.S), send_string("'s"),  timeout=100),
+    Sequence((AC_QUOT, KC.D), send_string("'d"),  timeout=100),
+    Sequence((AC_QUOT, KC.T), send_string("'t"),  timeout=100),
+    Sequence((AC_QUOT, KC.L), send_string("'ll"), timeout=100),
+    Sequence((AC_QUOT, KC.R), send_string("'re"), timeout=100), 
+    Sequence((AC_QUOT, KC.V), send_string("'ve"), timeout=100),
 
-    # Sequence((AC_SCLN, KC.A), send_ascii("ä"), timeout=200),
-    # Sequence((AC_SCLN, KC.E), send_ascii("ë"), timeout=200),
-    # Sequence((AC_SCLN, KC.I), send_ascii("ï"), timeout=200),
-    # Sequence((AC_SCLN, KC.O), send_ascii("ö"), timeout=200),
-    # Sequence((AC_SCLN, KC.U), send_ascii("ü"), timeout=200),
+    Sequence((AC_SCLN, KC.A), send_ascii("ä"), timeout=200),
+    Sequence((AC_SCLN, KC.E), send_ascii("ë"), timeout=200),
+    Sequence((AC_SCLN, KC.I), send_ascii("ï"), timeout=200),
+    Sequence((AC_SCLN, KC.O), send_ascii("ö"), timeout=200),
+    Sequence((AC_SCLN, KC.U), send_ascii("ü"), timeout=200),
 ]
 
 keyboard.modules.append(combos)
 
-# ASC_DEG = send_ascii("°")
-# ASC_BUL = send_ascii("·")
-# ASC_STR = send_ascii("ø")
+ASC_DEG = send_ascii("°")
+ASC_BUL = send_ascii("·")
+ASC_STR = send_ascii("ø")
 
 # Actual keymap
 keyboard.keymap = [
     [ #0 Base
-        LHS_1,   KC.Q,    KC.W,    KC.F,    KC.P,    KC.B,       KC.J,    KC.L,    KC.U,    KC.Y,    AC_SCLN, AC_MINS,
-        LHS_2,   KC.A,    KC.R,    KC.S,    KC.T,    KC.G,       KC.M,    KC.N,    KC.E,    KC.I,    KC.O,    AC_QUOT,
-        LHS_3,   KC.Z,    KC.X,    KC.C,    KC.D,    KC.V,       KC.K,    KC.H,    AC_COMM, AC_DOT,  AC_SLSH, AC_EQL,
+        LHS_1,   KC.Q,    KC.W,    KC.F,    KC.P,    KC.B,       KC.J,    KC.L,    KC.U,    KC.Y,    AC_SCLN, AC_MINS, #      ;: -_ \ ~
+        LHS_2,   KC.A,    KC.R,    KC.S,    KC.T,    KC.G,       KC.M,    KC.N,    KC.E,    KC.I,    KC.O,    AC_QUOT, #         "' | 
+        LHS_3,   KC.Z,    KC.X,    KC.C,    KC.D,    KC.V,       KC.K,    KC.H,    AC_COMM, AC_DOT,  AC_SLSH, AC_EQL,  #,( .) ?+ != / `
         XXXXX,   XXXXX,   XXXXX,   MRY_L1,  MRY_L2,  MRY_L3,     MRY_R1,  MRY_R2,  MRY_R3,  XXXXX,   XXXXX,   XXXXX   ],
 
     [ #1 Numpad
         KC.PSLS, KC.PAST, KC.P7,   KC.P8,   KC.P9,   KC.PMNS,    KC.BSLS, KC.P7,   KC.P8,   KC.P9,   KC.PSLS, KC.NLCK,
         KC.NLCK, KC.BSLS, KC.P4,   KC.P5,   KC.P6,   KC.PPLS,    KC.PDOT, KC.P4,   KC.P5,   KC.P6,   KC.PMNS, KC.PAST,
         KC.PDOT, KC.P0,   KC.P1,   KC.P2,   KC.P3,   KC.ENT,     KC.P0,   KC.P1,   KC.P2,   KC.P3,   KC.PPLS, KC.EQL,
-        XXXXX,   XXXXX,   XXXXX,   _______, _______, _______,    _______, _______, _______, XXXXX,   XXXXX,   XXXXX   ],
+        XXXXX,   XXXXX,   XXXXX,   MRY_ACT, _______, _______,    _______, _______, _______, XXXXX,   XXXXX,   XXXXX   ],
 
     [ #2 Nav       
         MM_CAT,  KC.HOME, KC.PGUP, KC.PGDN, KC.END,  KC.INS,     SEL_WRD, SEL_HOME,SEL_PGUP,SEL_PGDN,SEL_END, KC.NO,
         LHS_2,   KC.LEFT, KC.UP,   KC.DOWN, KC.RGHT, KC.ENT,     SEL_WLFT,SEL_LEFT,SEL_UP,  SEL_DOWN,SEL_RGHT,SEL_WRGT,
         SEL_HOME,SEL_WLFT,COL_DOWN,COL_UP,  SEL_WRGT,SEL_END,    KC.NO,   KC.NO,   COL_DOWN,COL_UP,  KC.NO,   KC.NO,
-        XXXXX,   XXXXX,   XXXXX,   _______, _______, _______,    _______, _______, _______, XXXXX,   XXXXX,   XXXXX   ],
+        XXXXX,   XXXXX,   XXXXX,   _______, _______, MRY_ACT,    _______, _______, _______, XXXXX,   XXXXX,   XXXXX   ],
     
     [ #3 RHS Symbols and Brackets (access via KC.LM(3, KC.LSFT))
-        KC.TRNS, KC.NO,   KC.N7,   KC.N8,   KC.N9,   KC.N0,      ASC_DEG,   KC.N7,   KC.N8,   KC.NO,   KC.COMM, KC.DOT,   
-        KC.TRNS, KC.NO,   KC.N4,   KC.N5,   KC.N6,   KC.NO,      ASC_BUL,   KC.N4,   KC.N5,   KC.N6,   KC.LBRC, KC.RBRC,
-        KC.TRNS, KC.NO,   KC.N1,   KC.N2,   KC.N3,   KC.LLOCK,   ASC_STR,   KC.N1,   KC.N2,   KC.N3,   SS_LSBR, SS_RSBR,
+        KC.TRNS, KC.NO,   KC.N7,   KC.N8,   KC.N9,   KC.N0,      ASC_DEG, KC.N7,   KC.N8,   KC.NO,   KC.COMM, KC.DOT,   
+        MRY_ACT, KC.NO,   KC.N4,   KC.N5,   KC.N6,   KC.NO,      ASC_BUL, KC.N4,   KC.N5,   KC.N6,   KC.LBRC, KC.RBRC,
+        MRY_ACT, KC.NO,   KC.N1,   KC.N2,   KC.N3,   KC.LLOCK,   ASC_STR, KC.N1,   KC.N2,   KC.N3,   SS_LSBR, SS_RSBR,
         XXXXX,   XXXXX,   XXXXX,   _______, _______, KC.TO(0),   _______, CE_PIN,  _______, XXXXX,   XXXXX,   XXXXX   ],
 
     [ #4 RHS Fn keys
-        KC.TRNS, TM_LHS,  TM_DN,   TM_UP,   TM_RHS,  TSKMN,      ALT_F4,  KC.F7,   KC.F8,   KC.F9,   KC.F12,  KC.PSCR,
-        KC.TRNS, KC.TRNS, KC.LALT, KC.LSFT, KC.LCTL, KC.NO,      KC.CAPS, KC.F4,   KC.F5,   KC.F6,   KC.F11,  KC.SLCK,
-        KC.TRNS, KC.TRNS, MM_LHS,  MM_RHS,  KC.NO,   KC.LLOCK,   KC.APP,  KC.F1,   KC.F2,   KC.F3,   KC.F10,  KC.PAUS,
+        KC.TRNS, TM_LHS,  TM_DN,   TM_UP,   TM_RHS,  TSKMN,      ALT_F4,  KC.F7,   KC.F8,   KC.F9,   KC.F12,  KC.CAPS,
+        KC.TRNS, MRY_ACT, KC.LALT, KC.LSFT, KC.LCTL, KC.NO,      KC.NO,   KC.F4,   KC.F5,   KC.F6,   KC.F11,  KC.SLCK,
+        KC.TRNS, MRY_ACT, MM_LHS,  MM_RHS,  KC.NO,   KC.LLOCK,   KC.APP,  KC.F1,   KC.F2,   KC.F3,   KC.F10,  KC.PAUS,
         XXXXX,   XXXXX,   XXXXX,   KC.LSFT, _______, KC.TO(0),   _______, _______, _______, XXXXX,   XXXXX,   XXXXX   ],
 ]
 
