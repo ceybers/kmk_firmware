@@ -233,4 +233,10 @@ class Layers(HoldTap):
             pass
 
     def _llock_pressed(self, key, keyboard, *args, **kwargs):
-        self._is_locked = True
+        if self._is_locked == True:
+            if len(keyboard.active_layers) > 1:
+                del keyboard.active_layers[0]
+                self._is_locked = True
+                keyboard.keys_pressed.clear()
+        else:
+            self._is_locked = True
