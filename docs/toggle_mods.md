@@ -24,3 +24,12 @@ keyboard.keymap = [
 ]
 ```
 
+## Keycodes
+
+|Keycode           |Description                       |
+|------------------|----------------------------------|
+|`KC.TCTL`         | Toggles `KC.LCTL` on/off         |
+|`KC.TSFT`         | Toggles `KC.LSFT` on/off         |
+|`KC.TALT`         | Toggles `KC.LALT` on/off         |
+|`KC.TGUI`         | Toggles `KC.LGUI` on/off         |
+
