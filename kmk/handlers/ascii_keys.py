@@ -45,17 +45,15 @@ def get_pos_nums(num):
 def send_ascii(message):
     if len(message) == 1:
         ascii = ord(message[0])
-
+        
         if ascii > 255:
             raise ValueError('send_ascii cannot send characters greater than U+00FF')
 
         ascii_arr = get_pos_nums(ascii)
-        
         seq = []
         seq.append(KC.P0)
-        seq.append(getattr(KC, "P" + str(ascii_arr[2])))
-        seq.append(getattr(KC, "P" + str(ascii_arr[1])))
-        seq.append(getattr(KC, "P" + str(ascii_arr[0])))
+        for i in reversed(ascii_arr):
+            seq.append(getattr(KC, "P" + str(i)))
     else:
         raise ValueError('send_ascii accepts only a single character')
     return simple_ascii_key_sequence(seq)
