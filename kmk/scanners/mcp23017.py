@@ -5,8 +5,28 @@ from kmk.scanners.keypad import KeypadScanner
 
 class MCPScanner(KeypadScanner):
     def __init__(self, row_pin_numbers, col_pin_numbers, i2c, i2c_address, offset):
-        mcp = MCP23017(i2c, address=i2c_address)
+        self.ready = False
+        self.row_pins = []
+        self.row_count = 0
+        self.col_pins = []
+        self.col_count = 0
+        self.previous_state = []
+        self.offset = offset
+        self.events = []
 
+        try:
+            mcp = MCP23017(i2c, address=i2c_address)
+        except:
+            print('Could not connect to MCP on address="%d"' % i2c_address)
+            pass
+        else:
+            self.initialize_mcp(mcp, row_pin_numbers, col_pin_numbers)
+            print('Initializing MCP on address="%d"' % i2c_address)
+            self.ready = True
+
+        super().__init__()
+
+    def initialize_mcp(self, mcp, row_pin_numbers, col_pin_numbers):
         self.row_pins = [mcp.get_pin(n) for n in row_pin_numbers]
         [p.switch_to_output(value=False) for p in self.row_pins]
         self.row_count = len(self.row_pins)
@@ -16,11 +36,6 @@ class MCPScanner(KeypadScanner):
         self.col_count = len(self.col_pins)
 
         self.previous_state = [[True for c in self.col_pins] for r in self.row_pins]
-        
-        self.offset = offset
-        self.events = []
-        
-        super().__init__()
 
     @property
     def key_count(self):
@@ -30,6 +45,9 @@ class MCPScanner(KeypadScanner):
         return (self.col_count * row + col) + self.offset
 
     def scan_for_changes(self):
+        if self.ready == False:
+            return None
+
         if self.events:
             return self.events.pop(0)
         

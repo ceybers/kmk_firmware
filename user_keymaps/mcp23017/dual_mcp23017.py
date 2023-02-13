@@ -17,15 +17,15 @@ i2c = busio.I2C(scl=board.GP1, sda=board.GP0, frequency=400000)
 keyboard = KMKKeyboard()
 keyboard.matrix = [
     MCPScanner( # LHS MCP23017 I/O Expander
-        row_pins = [0, 1, 2, 3],
-        col_pins = [8, 9, 10, 11, 12, 13],
+        row_pin_numbers = [0, 1, 2, 3],
+        col_pin_numbers = [8, 9, 10, 11, 12, 13],
         i2c = i2c,
         i2c_address = 0x20,
         offset = 0
     ),
     MCPScanner( # RHS MCP23017 I/O Expander
-        row_pins = [0, 1, 2, 3],
-        col_pins = [8, 9, 10, 12, 11, 13],
+        row_pin_numbers = [0, 1, 2, 3],
+        col_pin_numbers = [8, 9, 10, 12, 11, 13],
         i2c = i2c,
         i2c_address = 0x24,
         offset = 24
